@@ -256,7 +256,7 @@ int main(int argc, char *argv[]){
   std::vector<int> freqs;
   Genotype_def geno;
 
-  std::ofstream ofs("fixation_prob_seq.txt", std::ios::app);
+  std::ofstream ofs("establishment_prob_seq.txt", std::ios::app);
 
   int reps = 0;
   int regi_y_neo_fix = 0;

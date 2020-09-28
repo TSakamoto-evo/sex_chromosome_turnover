@@ -36,7 +36,6 @@ int main(){
   std::ofstream ofs("eq_e4_positive.txt");
   ofs << "p\tEBB\tEbB\tEBb\tEbb" << std::endl;
 
-  int n = 10000;
   double p = 1.0 - 0.00001;
 
   std::vector<double> mat = {1.0, r/(r+(1-hm)*sm), 0.0, 0.0};

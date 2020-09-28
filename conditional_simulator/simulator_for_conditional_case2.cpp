@@ -281,7 +281,7 @@ int main(){
   Genotype_def geno;
 
   std::ofstream ofs1("genotype.txt");
-  std::ofstream ofs2("fixation_prob.txt", std::ios::app);
+  std::ofstream ofs2("establishment_prob.txt", std::ios::app);
 
   ofs1 << "index\tmy\tfy\tmw\tfw\tma\tfa\tfemale" << std::endl;
   for(int i = 0; i < 64; i++){

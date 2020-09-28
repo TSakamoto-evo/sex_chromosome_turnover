@@ -172,7 +172,7 @@ std::vector<int> next_gen(const std::vector<double>& male_gamete,
       det_remain += deterministic.at(j);
     }
 
-    boost::random::binomial_distribution<> choose(n_remain, deterministic.at(i) / det_remain);
+    std::binomial_distribution<> choose(n_remain, deterministic.at(i) / det_remain);
     next_generarion.at(i) = choose(mt);
     n_remain -= next_generarion.at(i);
   }
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]){
   std::vector<int> freqs;
   Genotype_def geno;
 
-  std::ofstream ofs("fixation_prob_seq.txt", std::ios::app);
+  std::ofstream ofs("establishment_prob_seq.txt", std::ios::app);
 
   int reps = 0;
   int regi_w_fix = 0;
