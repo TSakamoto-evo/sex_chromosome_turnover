@@ -127,7 +127,7 @@ int main(){
   }
 
   // run simulation for 50N generations
-  for(int i = 0; i < 50 * paras.pop_size; i++){
+  for(int i = 0; i <= 50 * paras.pop_size; i++){
     pop.one_generation();
     if( i % paras.pop_size == 0 ){
       std::cout << i << "\t" << pop.return_mut_sites() << std::endl;

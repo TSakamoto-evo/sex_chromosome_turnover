@@ -1,6 +1,4 @@
 #include "population.hpp"
-#include <cmath>
-#include <iostream>
 
 Population::Population( Parameters paras, double b_freq ){
   para = paras;
@@ -23,14 +21,14 @@ Population::Population( Parameters paras, double b_freq ){
 
   std::vector<Individual> inds_tmp;
   for(int i = 0; i < para.pop_size; i++){
-    int mother_x = 0;
-    int father_x = half(mt);
+    int mother_xy = 0;
+    int father_xy = half(mt);
     int mother_a = 0;
     int father_a = 0;
     int mother_b = pb(mt);
     int father_b = pb(mt);
 
-    inds_tmp.emplace_back(mother_x*2+father_x, mother_a*2+father_a, mother_b*2+father_b, tmp_neutral, tmp_neutral);
+    inds_tmp.emplace_back(mother_xy*2+father_xy, mother_a*2+father_a, mother_b*2+father_b, tmp_neutral, tmp_neutral);
   }
   inds = inds_tmp;
 }
@@ -308,13 +306,18 @@ void Population::one_generation(){
 
 std::vector<double> Population::calculate_pi(int seps, int num_samples){
   std::vector<std::vector<bool>> samples;
-  std::uniform_int_distribution<> choose_ind(0, para.pop_size - 1);
   std::bernoulli_distribution half(0.5);
+
+  std::vector<int> ind_indices;
+  for(int i = 0; i < para.pop_size - 1; i++){
+    ind_indices.push_back(i);
+  }
+  std::shuffle( ind_indices.begin(), ind_indices.end(), mt );
 
   std::vector<int> diffs(seps);
 
   for(int i = 0; i < num_samples; i++){
-    int ind = choose_ind(mt);
+    int ind = ind_indices.at(i);
     if(half(mt)){
       samples.push_back(inds.at(ind).return_neutral0());
     }else{
@@ -344,26 +347,49 @@ std::vector<std::vector<double>> Population::calculate_pi_conditional_a(int seps
   std::vector<std::vector<bool>> samples0;
   std::vector<std::vector<bool>> samples1;
 
-  std::bernoulli_distribution half(0.5);
-
-  std::vector<int> males;
-  std::vector<int> females;
+  std::vector<int> type0;
+  std::vector<int> type1;
 
   for(int i = 0; i < para.pop_size; i++){
-    if(inds.at(i).return_sex() == 1){
-      females.push_back(i);
+    int locus_a = inds.at(i).return_a();
+    int hap1 = locus_a / 2;
+    int hap0 = locus_a % 2;
+
+    if(hap0 == 1){
+      type1.push_back(i);
     }else{
-      males.push_back(i);
+      type0.push_back(i);
+    }
+
+    if(hap1 == 1){
+      type1.push_back(i + para.pop_size);
+    }else{
+      type0.push_back(i + para.pop_size);
     }
   }
 
-  std::uniform_int_distribution<> choose_female(0, static_cast<int>(females.size()) - 1);
-  std::uniform_int_distribution<> choose_male(0, static_cast<int>(males.size()) - 1);
+  std::shuffle( type0.begin(), type0.end(), mt);
+  std::shuffle( type1.begin(), type1.end(), mt);
 
   for(int i = 0; i < num_samples; i++){
-    int ind = males.at(choose_male(mt));
-    samples0.push_back(inds.at(ind).return_neutral0());
-    samples1.push_back(inds.at(ind).return_neutral1());
+    int index0 = type0.at(i);
+    int index1 = type1.at(i);
+
+    if(index0 >= para.pop_size){
+      int ind = index0 - para.pop_size;
+      samples0.push_back(inds.at(ind).return_neutral1());
+    }else{
+      int ind = index0;
+      samples0.push_back(inds.at(ind).return_neutral0());
+    }
+
+    if(index1 >= para.pop_size){
+      int ind = index1 - para.pop_size;
+      samples1.push_back(inds.at(ind).return_neutral1());
+    }else{
+      int ind = index1;
+      samples1.push_back(inds.at(ind).return_neutral0());
+    }
   }
 
   std::vector<int> diffs_w0(seps);

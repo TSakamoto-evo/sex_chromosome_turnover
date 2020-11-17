@@ -4,6 +4,8 @@
 #include "parameters.hpp"
 #include "individual.hpp"
 #include <random>
+#include <algorithm>
+#include <cmath>
 
 class Population{
 private:
