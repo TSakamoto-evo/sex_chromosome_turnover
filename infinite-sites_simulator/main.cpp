@@ -6,7 +6,7 @@
 int main(){
   Parameters paras;
 
-  paras.pop_size = 1000;
+  paras.pop_size = 10000;
   paras.recomb_rate = 0.002;
   paras.mut_rate = 0.01;
   paras.mut_rate_at_b = 0.000001;

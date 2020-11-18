@@ -371,61 +371,70 @@ std::vector<std::vector<double>> Population::calculate_pi_conditional_a(int seps
   std::shuffle( type0.begin(), type0.end(), mt);
   std::shuffle( type1.begin(), type1.end(), mt);
 
-  for(int i = 0; i < num_samples; i++){
-    int index0 = type0.at(i);
-    int index1 = type1.at(i);
+  if( static_cast<int>(type0.size()) > num_samples && static_cast<int>(type1.size()) > num_samples ){
+    for(int i = 0; i < num_samples; i++){
+      int index0 = type0.at(i);
+      int index1 = type1.at(i);
 
-    if(index0 >= para.pop_size){
-      int ind = index0 - para.pop_size;
-      samples0.push_back(inds.at(ind).return_neutral1());
-    }else{
-      int ind = index0;
-      samples0.push_back(inds.at(ind).return_neutral0());
-    }
-
-    if(index1 >= para.pop_size){
-      int ind = index1 - para.pop_size;
-      samples1.push_back(inds.at(ind).return_neutral1());
-    }else{
-      int ind = index1;
-      samples1.push_back(inds.at(ind).return_neutral0());
-    }
-  }
-
-  std::vector<int> diffs_w0(seps);
-  std::vector<int> diffs_w1(seps);
-  std::vector<int> diffs_b(seps);
-
-  for(int i = 0; i < para.num_sites; i++){
-    int derived0 = 0;
-    int derived1 = 0;
-
-    for(int j = 0; j < num_samples; j++){
-      if(samples0.at(j).at(i) == 1){
-        derived0++;
+      if(index0 >= para.pop_size){
+        int ind = index0 - para.pop_size;
+        samples0.push_back(inds.at(ind).return_neutral1());
+      }else{
+        int ind = index0;
+        samples0.push_back(inds.at(ind).return_neutral0());
       }
-      if(samples1.at(j).at(i) == 1){
-        derived1++;
+
+      if(index1 >= para.pop_size){
+        int ind = index1 - para.pop_size;
+        samples1.push_back(inds.at(ind).return_neutral1());
+      }else{
+        int ind = index1;
+        samples1.push_back(inds.at(ind).return_neutral0());
       }
     }
-    int window = std::floor(index_pos.at(i) * seps);
-    diffs_w0.at(window) += derived0 * (num_samples - derived0);
-    diffs_w1.at(window) += derived1 * (num_samples - derived1);
-    diffs_b.at(window) += derived0 * (num_samples - derived1) + derived1 * (num_samples - derived0);
+
+    std::vector<int> diffs_w0(seps);
+    std::vector<int> diffs_w1(seps);
+    std::vector<int> diffs_b(seps);
+
+    for(int i = 0; i < para.num_sites; i++){
+      int derived0 = 0;
+      int derived1 = 0;
+
+      for(int j = 0; j < num_samples; j++){
+        if(samples0.at(j).at(i) == 1){
+          derived0++;
+        }
+        if(samples1.at(j).at(i) == 1){
+          derived1++;
+        }
+      }
+      int window = std::floor(index_pos.at(i) * seps);
+      diffs_w0.at(window) += derived0 * (num_samples - derived0);
+      diffs_w1.at(window) += derived1 * (num_samples - derived1);
+      diffs_b.at(window) += derived0 * (num_samples - derived1) + derived1 * (num_samples - derived0);
+    }
+
+    std::vector<double> ret_w0;
+    std::vector<double> ret_w1;
+    std::vector<double> ret_b;
+
+    for(int i = 0; i < seps; i++){
+      ret_w0.push_back( 2.0 * diffs_w0.at(i) / num_samples / (num_samples - 1) );
+      ret_w1.push_back( 2.0 * diffs_w1.at(i) / num_samples / (num_samples - 1) );
+      ret_b.push_back( 1.0 * diffs_b.at(i) / num_samples / num_samples );
+    }
+
+    std::vector<std::vector<double>> ret = {ret_w0, ret_w1, ret_b};
+    return(ret);
+  }else{
+    std::vector<double> ret_w0(seps, 0.0);
+    std::vector<double> ret_w1(seps, 0.0);
+    std::vector<double> ret_b(seps, 0.0);
+
+    std::vector<std::vector<double>> ret = {ret_w0, ret_w1, ret_b};
+    return(ret);
   }
-
-  std::vector<double> ret_w0;
-  std::vector<double> ret_w1;
-  std::vector<double> ret_b;
-
-  for(int i = 0; i < seps; i++){
-    ret_w0.push_back( 2.0 * diffs_w0.at(i) / num_samples / (num_samples - 1) );
-    ret_w1.push_back( 2.0 * diffs_w1.at(i) / num_samples / (num_samples - 1) );
-    ret_b.push_back( 1.0 * diffs_b.at(i) / num_samples / num_samples );
-  }
-
-  std::vector<std::vector<double>> ret = {ret_w0, ret_w1, ret_b};
-  return(ret);
 }
 
 void Population::introduce_a(){
